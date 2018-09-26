@@ -7,21 +7,93 @@ program PepitaGame {
 	
 //	CONFIG	
 	game.title("Pepita")
-	game.height(10)
-	game.width(10)
-	game.ground("suelo.png")
+	game.height(12)
+	game.width(25)
+	game.boardGround("fondodia1.png")
 
 //	VISUALES
-	game.addVisualIn(alpiste, game.at(5,5))
-	game.addVisualIn(manzana, game.at(5,1))
+	game.addVisual(manzana)
+	game.addVisualIn(alpiste, game.at(9,1))
+	game.addVisualIn(luz, game.at(10,10))
 	game.addVisual(buenosAires)
 	game.addVisual(villaGesell)
 	game.addVisualCharacter(pepita)
-
+	game.addVisualCharacter(pepon)
+	game.addVisualCharacter(pipa)
+	game.addVisualCharacter(roque)
+	game.onTick(50, {=> roque.animacion()})
+	game.onTick(10000, {=> luz.funcion()})
+	game.onTick(50, {=> pepita.animacion()})
+//	game.onTick(3000, {=> pepita.sinMovimientos()})
+//	game.onTick(50, {=> if(pepita.movimientos())
+//		{pepita.animacion()}
+//		else {pepita.animacionInactiva()}
+//	})
+//	game.onTick(3000, {=> pepon.sinMovimientos()})
+//	game.onTick(50, {=> if(pepon.movimientos())
+//		{pepon.animacion()}
+//		else {pepon.animacionInactiva()}
+//	})
+//	game.onTick(3000, {=> pipa.sinMovimientos()})
+//	game.onTick(50, {=> if(pipa.movimientos())
+//		{pipa.animacion()}
+//		else {pipa.animacionInactiva()}
+//	})
+// Todo este codigo es para la inactividad, el problema es que consume muchos recursos y comienza a fallar.
+// este codigo lo que hace es preguntar si el ave esta inactiva, evalua la posicion anterior con la nueva
+// esto hace que use la animacion normal, ahora para lograr la inactividad, tuve que usar 2 temporizadores,
+// uno que pregunta si esta inactiva, y otro que hace que las 2 posiciones sean iguales si transcurre cierto tiempo,
+// osea, use un acumulador, el acumulador se adiciona al tiempo de restablecimiento de inactividad evitando que
+// el mismo juego restablesca al ave a inactiva cuando esta siendo usada, ya que con cada accion se retrasa mas la inactividad.
+// esta fue la unica forma que encontre para hacer esto, lo malo es, que consume muchos recursos y por eso lo puse todo en comentarios.
+	game.onTick(50, {=> pepon.animacion()})
+	game.onTick(50, {=> pipa.animacion()})
+	game.whenCollideDo(pepita, {comida => pepita.come(comida)
+		game.removeVisual(alpiste)
+	})
+	game.whenCollideDo(pepon, {comida => pepon.come(comida)
+		game.removeVisual(alpiste)
+	})
+	game.whenCollideDo(pipa, {comida => pipa.come(comida)
+		game.removeVisual(alpiste)
+	})
+	game.whenCollideDo(pepita, {comida => game.removeVisual(manzana)
+		game.addVisual(arbol)})
+	game.whenCollideDo(pepon, {comida => game.removeVisual(manzana)
+		game.addVisual(arbol)})
+	game.whenCollideDo(pipa, {comida => game.removeVisual(manzana)
+		game.addVisual(arbol)})
+	game.whenCollideDo(roque, {comida => game.removeVisual(manzana)
+		game.addVisual(arbol)})
+// aca hay otra forma de hacerlo mucho mas simple, pero como quize separar lo que le pasa al alpiste
+// de lo que pasa con la manzana, puse dos formas distintas para que se ejecuten de distinta manera
+//	game.whenCollideDo(roque, {comida => game.removeVisual(comida)
+//	if (comida == manzana){game.addVisual(arbol)}})
+// esta tambien pudo haber sido otra forma mas de hacerlo, pero se me paso por alto.
+	game.whenCollideDo(roque, {comida => 
+		roque.almacenarComida(comida)
+		game.removeVisual(alpiste)
+	})
+	game.whenCollideDo(roque, {ave=> roque.alimentarAve(ave)})
+	game.onTick(10000, {=> game.addVisual(manzana)
+		game.removeVisual(arbol)
+	})
+	
 //	TECLADO
-	keyboard.v().onPressDo { pepita.volaHacia(villaGesell) }
-	keyboard.b().onPressDo { pepita.volaHacia(buenosAires) }
-		
+
+	keyboard.v().onPressDo { cambio.volaHacia(villaGesell) }
+	keyboard.b().onPressDo { cambio.volaHacia(buenosAires) }
+	keyboard.w().onPressDo { cambio.arriba()}
+	keyboard.s().onPressDo { cambio.abajo()}
+	keyboard.a().onPressDo { cambio.izquierda()}
+	keyboard.d().onPressDo { cambio.derecha()}
+	keyboard.num5().onPressDo { roque.arriba()}
+	keyboard.num2().onPressDo { roque.abajo()}
+	keyboard.num1().onPressDo { roque.izquierda()}
+	keyboard.num3().onPressDo { roque.derecha()}
+	keyboard.c().onPressDo { cambio.seleccionarAve()}
+	keyboard.x().onPressDo { game.addVisualIn(alpiste, game.at(9,1))}
+// no hay forma directa de cambiar las teclas de movimiento por otra, salvo modificandolas aca.
 //	START
 	game.start()
 }

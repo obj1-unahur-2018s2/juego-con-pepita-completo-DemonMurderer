@@ -1,6 +1,7 @@
 object manzana {
-	const property imagen = "manzana.png"
+	const property imagen = "arboldemanzanas.png"
 	method energia() = 80
+	method posicion() = game.at(8,0)
 }
 
 object alpiste {
